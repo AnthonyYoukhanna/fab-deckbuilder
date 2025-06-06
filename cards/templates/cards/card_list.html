@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Card List</title>
+</head>
+<body>
+    <h1>Cards</h1>
+    <form method="get">
+        <!--
+        <label for="class">Class:</label>
+        <select name="class" id="class">
+            <option value="">All</option>
+            <option value="Warrior">Warrior</option>
+            <option value="Wizard">Wizard</option>
+            <! Add more classes as needed >
+        </select>
+        -->
+        <label for="set">Set:</label>
+        <select name="set" id="set">
+            <option value="">All</option>
+            {% for s in sets %}
+                <option value="{{ s.id }}" {% if request.GET.set == s.id|stringformat:"s" %}selected{% endif %}>
+                    {{ s.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="rarity">Rarity:</label>
+        <select name="rarity" id="rarity">
+            <option value="">All</option>
+            {% for r in rarities %}
+                <option value="{{ r.id }}" {% if request.GET.rarity == r.id|stringformat:"s" %}selected{% endif %}>
+                {{ r.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="sort">Sort By:</label>
+        <select name="sort" id="sort">
+            <option value="name">Name</option>
+            <option value="pitch">Pitch</option>
+            <option value="cost">Cost</option>
+        </select>
+
+        <button type="submit">Apply</button>
+    </form>
+    <ul>
+        {% for card in cards %}
+            <li>{{ card.name }} — {{ card.set.name }} — {{ card.rarity.name }}</li>
+        {% empty %}
+            <li>No cards available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
