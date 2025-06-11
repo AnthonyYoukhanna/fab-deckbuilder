@@ -1,7 +1,9 @@
 from django.db import models
 from django.conf import settings
 
-# Create your models here.
+# -----------------------------
+# Lookup Models
+# -----------------------------
 
 class CardType(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -14,61 +16,99 @@ class CardSubType(models.Model):
 
     def __str__(self):
         return self.name
+
 class Keyword(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
-class Set(models.Model):
-    name = models.CharField(max_length=100)
-    release_date = models.DateField(null=True, blank=True)
+
+class FunctionalKeyword(models.Model):
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
 
+class Set(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    release_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 class Rarity(models.Model):
     name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
-    
-class CardTypes(models.Model):
-    name = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.name
-    
+# -----------------------------
+# Core Models
+# -----------------------------
+
 class Card(models.Model):
+    unique_id = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    type_text = models.CharField(max_length=200, null=True, blank=True)
+    played_horizontally = models.BooleanField(default=False)
 
-    PITCH_CHOICES = [
-        (1, "Blue (1)"),
-        (2, "Yellow (2)"),
-        (3, "Red (3)")
-    ]
-    FOIL_CHOICES = [
-        ('NF', 'No Foil'),
-        ('RF', 'Rainbow Foil'),
-        ('CF', 'Cold Foil')
-    ]
-    pitch = models.IntegerField(choices=PITCH_CHOICES, null=True, blank=True)
-    foil = models.CharField(choices=FOIL_CHOICES, max_length=2, default='NF')
+    cost = models.CharField(max_length=50, null=True, blank=True)
+    pitch = models.IntegerField(choices=[(3, "Blue (3)"), (2, "Yellow (2)"), (1, "Red (1)")], null=True, blank=True)
+    power = models.CharField(max_length=10, blank=True, null=True)
+    defense = models.CharField(max_length=10, blank=True, null=True)
+    health = models.CharField(max_length=10, blank=True, null=True)
+    intelligence = models.CharField(max_length=10, blank=True, null=True)
+    arcane = models.CharField(max_length=10, blank=True, null=True)
 
-    name = models.CharField(max_length=200) #name of card
-    set =  models.ForeignKey(Set, on_delete=models.CASCADE)
-    rarity = models.ForeignKey(Rarity, on_delete=models.SET_NULL, null=True) #   rarity
-    types = models.ManyToManyField(CardType, related_name='cards')
-    #subtypes = models.ManyToManyField(CardSubType, blank=True)
+    is_token = models.BooleanField(default=False)
+    is_starter = models.BooleanField(default=False)
+
+    types = models.ManyToManyField(CardType, related_name='cards', blank=True)
+    subtypes = models.ManyToManyField(CardSubType, blank=True)
     keywords = models.ManyToManyField(Keyword, blank=True)
-    cost = models.CharField(max_length=50, null=True, blank=True)   #   cost
-    #pitch = models.IntegerField(null=True, blank=True)#   pitch
-    description = models.TextField(null=True, blank=True)   #   description
+    functional_keywords = models.ManyToManyField(FunctionalKeyword, blank=True)
+    variations = models.ManyToManyField("self", symmetrical=False, blank=True)
+
+    blitz_legal = models.BooleanField(default=True)
+    cc_legal = models.BooleanField(default=True)
+    commoner_legal = models.BooleanField(default=False)
+    ll_legal = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
-    
 
 class UserCard(models.Model):
-    user =  models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
-    quantity =  models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=1)
+
+# -----------------------------
+# Card Printing / Version Info
+# -----------------------------
+
+class CardPrinting(models.Model):
+    FOIL_CHOICES = [
+        ('S', 'Standard'),
+        ('R', 'Rainbow Foil'),
+        ('C', 'Cold Foil'),
+        ('G', 'Gold Foil')
+    ]
+    unique_id = models.CharField(max_length=100, unique=True)
+    card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name='printings')
+    set = models.ForeignKey(Set, on_delete=models.CASCADE)
+    edition = models.CharField(max_length=10, null=True, blank=True)
+    foiling = models.CharField(max_length=10, null=True, blank=True)
+    rarity = models.ForeignKey(Rarity, on_delete=models.SET_NULL, null=True, blank=True)
+    art_variation = models.CharField(max_length=100, blank=True, null=True)
+    image_url = models.URLField()
+    tcgplayer_url = models.URLField(blank=True, null=True)
+    artists = models.JSONField(default=list, blank=True)
+    card_number = models.CharField(max_length=20, null=True, blank=True)
+
+    class Meta:
+        unique_together = ('card', 'set', 'foiling', 'rarity', 'edition', 'art_variation', 'card_number')
+
+    def __str__(self):
+        return f"{self.card.name} ({self.set.name})"
