@@ -106,9 +106,10 @@ class CardPrinting(models.Model):
     tcgplayer_url = models.URLField(blank=True, null=True)
     artists = models.JSONField(default=list, blank=True)
     card_number = models.CharField(max_length=20, null=True, blank=True)
+    flavour_text = models.CharField(max_length=200,blank=True,null=True)
 
     class Meta:
-        unique_together = ('card', 'set', 'foiling', 'rarity', 'edition', 'art_variation', 'card_number')
+        unique_together = ('unique_id',)
 
     def __str__(self):
         return f"{self.card.name} ({self.set.name})"

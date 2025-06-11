@@ -22,7 +22,7 @@ class Command(BaseCommand):
                 raise ValueError(f"Missing unique_id for entry: {entry.get('name')}")
 
 
-            card, card_created = Card.objects.get_or_create(
+            card, card_created = Card.objects.update_or_create(
                 unique_id = entry.get("unique_id"),
                 defaults={
                     "name": entry.get("name", ""),
@@ -33,7 +33,7 @@ class Command(BaseCommand):
                     "health": entry.get("health") or None,
                     "intelligence": entry.get("intelligence") or None,
                     "arcane": entry.get("arcane") or None,
-                    "description": entry.get("rules_text") or None,
+                    "description": entry.get("functional_text") or None,
                     "type_text": entry.get("type_text") or None,
                     "played_horizontally": entry.get("played_horizontally", False),
                     "is_token": entry.get("is_token", False),
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     "ll_legal": entry.get("ll_legal", False),
                 }
             )
-            print(f"{'🟢 Created' if card_created else '🔵 Skipped'} card: {card.name}")
+            #print(f"{'🟢 updated' if card_created else '🔵 Skipped'} card: {card.name}")
 
             # --- Card Types ---
             card.types.clear()
@@ -64,7 +64,7 @@ class Command(BaseCommand):
 
             # --- Keywords ---
             card.keywords.clear()
-            for kw in entry.get("keywords", []):
+            for kw in entry.get("card_keywords", []):
                 keyword, created = Keyword.objects.get_or_create(name=kw)
                 card.keywords.add(keyword)
                 if created:
@@ -104,26 +104,28 @@ class Command(BaseCommand):
                 foiling = printing.get("foiling")
                 unique_id = printing.get("unique_id")   
 
-                print(f"Trying: {card.name} [{set_code}] ({foiling}) #{card_number}, {edition}, {rarity_obj}")
+                #print(f"Trying: {card.name} [{set_code}] ({foiling}) #{card_number}, {edition}, {rarity_obj}")
                 # 🛡️ Guard clause to skip if unique_id already exists
-                if CardPrinting.objects.filter(unique_id=unique_id).exists():
-                    print(f"⚠️ Skipping duplicate unique_id: {unique_id}")
-                    continue
+                # if CardPrinting.objects.filter(unique_id=unique_id).exists():
+                #     print(f"⚠️ Skipping duplicate unique_id: {unique_id}")
+                #     continue
 
-                cp, cp_created = CardPrinting.objects.get_or_create(
+                cp, cp_created = CardPrinting.objects.update_or_create(
                     unique_id = unique_id,
-                    art_variation = printing.get("art_variations", ""),
-                    card=card,
-                    set=set_obj,
-                    foiling=foiling,
-                    card_number=card_number or "",
-                    edition=edition or "",
-                    rarity=rarity_obj,
-                    defaults={
-                        "image_url": image_url or "",
-                        "tcgplayer_url": printing.get("tcgplayer_url", ""),
-                        "artists": printing.get("artist", []) or [],
-                        }
+                    defaults = {
+                        "art_variation": printing.get("art_variations", ""),
+                        "flavour_text": printing.get("flavour_text", ""),
+                        "card":card,
+                        "set":set_obj,
+                        "foiling":foiling,
+                        "card_number":card_number or "",
+                        "edition":edition or "",
+                        # rarity=rarity_obj,
+                        # image_url= image_url or "",
+                        # tcgplayer_url = printing.get("tcgplayer_url", ""),
+                        "artists": printing.get("artists", []) or [],
+                    }
+                    
                 )
                 
-                print(f"  {'🖨️ Added' if cp_created else '◽ Skipped'} printing: {card.name} [{set_code}] ({foiling})")
+                #print(f"  {'🖨️ Added' if cp_created else '◽ Skipped'} printing: {card.name} [{set_code}] ({foiling})")

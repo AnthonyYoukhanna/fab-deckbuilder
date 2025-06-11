@@ -1,0 +1,43 @@
+<h2>{{ printing.card.name }}</h2>
+<img src="{{ printing.image_url }}" alt="{{ printing.card.name }} image" style="max-width:300px; height:auto;">
+
+<div>
+    <h3>Card Details</h3>
+    <ul>
+        <li><strong>Type:</strong> {{ printing.card.type_text }}</li>
+        <li><strong>Cost:</strong> {{ printing.card.cost }}</li>
+        <li><strong>Pitch:</strong> {{ printing.card.pitch }}</li>
+        <li><strong>Power:</strong> {{ printing.card.power }}</li>
+        <li><strong>Defense:</strong> {{ printing.card.defense }}</li>
+        <li><strong>Effect:</strong> {{ printing.card.description }}</li>
+    </ul>
+</div>
+
+<div>
+    <h3>Printing Details</h3>
+    <ul>
+        <li><strong>Set:</strong> {{ printing.set.name }}</li>
+        <li><strong>Rarity:</strong> {{ printing.rarity.name }}</li>
+        <li><strong>Foiling:</strong> {{ printing.foiling }}</li>
+        <li><strong>Edition:</strong> {{ printing.edition}}</li>
+    </ul>
+</div>
+
+<a href="{% url 'card_list' %}">← Back to list</a>
+
+{% if other_printings %}
+    <div>
+        <h3>Other Printings</h3>
+        <ul>
+            {% for p in other_printings %}
+                <li>
+                    <a href="{% url 'card_printing_detail' p.id %}">
+                        <img src="{{ p.image_url }}" alt="{{ p.card.name }} alt printing" style="width:100px;"><br>
+                        {{ p.set.name }} — {{ p.foiling }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
