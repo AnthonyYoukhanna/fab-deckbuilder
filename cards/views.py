@@ -54,4 +54,3 @@ def card_printing_detail(request, unique_id):
         'printing': printing,
         'other_printings': other_printings,
         })
-

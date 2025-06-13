@@ -21,4 +21,6 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('cards/', include('cards.urls')),
-]
+    path('registration/', include('users.urls')),     # custom user views
+    path('registration/', include('django.contrib.auth.urls')),  # login/logout
+    ]
