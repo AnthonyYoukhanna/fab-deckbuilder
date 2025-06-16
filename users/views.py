@@ -10,10 +10,3 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
-
-def logout(request):
-    #logout(request)
-    return render(request,'registration/logged_out.html',{})
-
-def login(request):
-    return render(request,'registration/login.html')
