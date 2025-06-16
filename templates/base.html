@@ -2,6 +2,10 @@
 <html>
 <head>
     <title>{% block title %}Deckbuilder{% endblock %}</title>
+    <script>
+        window.csrfToken = '{{ csrf_token }}';
+        window.INCREMENT_URL = "{% url 'increment_card' %}";
+    </script>
 </head>
 <body>
     {%include "navbar.html"%}

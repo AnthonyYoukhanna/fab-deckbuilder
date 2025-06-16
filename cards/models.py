@@ -79,10 +79,6 @@ class Card(models.Model):
     def __str__(self):
         return self.name
 
-class UserCard(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    card = models.ForeignKey(Card, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
 
 # -----------------------------
 # Card Printing / Version Info
@@ -113,3 +109,14 @@ class CardPrinting(models.Model):
 
     def __str__(self):
         return f"{self.card.name} ({self.set.name})"
+
+
+class UserCardPrintings(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    card_printing = models.ForeignKey(CardPrinting, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=0)
+    class Meta:
+        unique_together = ('user', 'card_printing')
+
+    def __str__(self):
+        return f"{self.user.username} owns {self.quantity} of {self.card_printing}"

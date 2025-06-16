@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from django.http import QueryDict
-from .models import Card, Set, Rarity, CardPrinting
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.http import QueryDict, JsonResponse
+from .models import Card, Set, Rarity, CardPrinting, UserCardPrintings   
 
 # Create your views here.
 
@@ -10,6 +12,13 @@ def card_list(request):
     cards = CardPrinting.objects.select_related('card', 'set', 'rarity').all()
     sets = Set.objects.all()
     rarities = Rarity.objects.all()
+    user_quantities = {}
+    if request.user.is_authenticated:
+        user_quantities = {
+            u.card_printing.unique_id: u.quantity
+            for u in UserCardPrintings.objects.filter(user=request.user)
+        }
+
 
     if 'rarity' in request.GET and request.GET['rarity']:
         cards = cards.filter(rarity_id=request.GET['rarity'])
@@ -37,6 +46,7 @@ def card_list(request):
         'sets':sets,
         'rarities': rarities,
         'query_string':query_string,
+        'quantities': user_quantities,
         }
     
 
@@ -54,3 +64,19 @@ def card_printing_detail(request, unique_id):
         'printing': printing,
         'other_printings': other_printings,
         })
+
+#this is for incrimenting users collection
+
+@login_required
+def increment_card(request):
+    if request.method == 'POST':
+        unique_id = request.POST.get('unique_id')
+        try:
+            printing = CardPrinting.objects.get(unique_id=unique_id)
+            user_card, created = UserCardPrintings.objects.get_or_create(user=request.user, card_printing=printing)
+            user_card.quantity += 1
+            user_card.save()
+            return JsonResponse({'quantity': user_card.quantity})
+        except CardPrinting.DoesNotExist:
+            return JsonResponse({'error': 'Card printing not found.'}, status=404)
+    return JsonResponse({'error': 'Invalid request.'}, status=400)
