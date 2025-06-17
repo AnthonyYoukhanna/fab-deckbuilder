@@ -10,8 +10,9 @@ class Command(BaseCommand):
     help = "Import cards from JSON"
 
     def handle(self, *args, **kwargs):
-        with open("cards.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
+        url = "https://the-fab-cube.github.io/flesh-and-blood-cards/json/english/card.json"
+        response = requests.get(url)
+        data = response.json()
 
         print("📥 Starting card import...")
 
@@ -44,7 +45,7 @@ class Command(BaseCommand):
                     "ll_legal": entry.get("ll_legal", False),
                 }
             )
-            #print(f"{'🟢 updated' if card_created else '🔵 Skipped'} card: {card.name}")
+            print(f"{'🟢 updated' if card_created else '🔵 Skipped'} card: {card.name}")
 
             # --- Card Types ---
             card.types.clear()
@@ -80,16 +81,18 @@ class Command(BaseCommand):
 
             # --- Printings ---
             for printing in entry.get("printings", []):
-                set_code = printing.get("set_id")
+                set_code = printing.get("set_printing_unique_id")
                 if not set_code:
                     continue
 
                 set_obj, set_created = Set.objects.get_or_create(
-                    code=set_code,
+                    name=set_code,  # Assuming 'set_code' is the name or identifier of the set
                     defaults={"name": set_code}
                 )
+
                 if set_created:
                     print(f"  🗃️ Created Set: {set_code}")
+
 
                 rarity_name = printing.get("rarity")
                 rarity_obj = None
@@ -120,12 +123,12 @@ class Command(BaseCommand):
                         "foiling":foiling,
                         "card_number":card_number or "",
                         "edition":edition or "",
-                        # rarity=rarity_obj,
-                        # image_url= image_url or "",
-                        # tcgplayer_url = printing.get("tcgplayer_url", ""),
+                        "rarity":rarity_obj,
+                        "image_url": image_url or "",
+                        "tcgplayer_url": printing.get("tcgplayer_url", ""),
                         "artists": printing.get("artists", []) or [],
                     }
                     
                 )
                 
-                #print(f"  {'🖨️ Added' if cp_created else '◽ Skipped'} printing: {card.name} [{set_code}] ({foiling})")
+                print(f"  {'🖨️ Added' if cp_created else '◽ Skipped'} printing: {card.name} [{set_code}] ({foiling})")

@@ -58,8 +58,8 @@ def card_detail(request, card_id):
                   {'card': card})
 
 def card_printing_detail(request, unique_id):
-    printing = get_object_or_404(CardPrinting, unique_id=unique_id)
-    other_printings = CardPrinting.objects.filter(card=printing.card).exclude(id=printing.id)
+    printing = get_object_or_404(CardPrinting.objects.select_related('set'),  unique_id=unique_id)
+    other_printings = CardPrinting.objects.select_related('set').filter(card=printing.card).exclude(id=printing.id)
     return render(request, 'cards/printing_detail.html', {
         'printing': printing,
         'other_printings': other_printings,

@@ -22,7 +22,7 @@
     <div>
         <h3>Printing Details</h3>
         <ul>
-            <li><strong>Set:</strong> {{ printing.set.name }}</li>
+            <li><strong>Set:</strong> {{ printing.set.id }}</li>
             <li><strong>Rarity:</strong> {{ printing.rarity.name }}</li>
             <li><strong>Foiling:</strong> {{ printing.foiling }}</li>
             <li><strong>Edition:</strong> {{ printing.edition}}</li>
@@ -37,7 +37,7 @@
             <ul>
                 {% for p in other_printings %}
                     <li>
-                        <a href="{% url 'card_printing_detail' p.id %}">
+                        <a href="{% url 'card_printing_detail' p.unique_id %}">
                             <img src="{{ p.image_url }}" alt="{{ p.card.name }} alt printing" style="width:100px;"><br>
                             {{ p.set.name }} — {{ p.foiling }}
                         </a>

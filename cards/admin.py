@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     CardType, CardSubType, Keyword, FunctionalKeyword,
-    Set, Rarity, Card, CardPrinting, UserCardPrintings
+    Set, Rarity, Card, CardPrinting, UserCardPrintings,SetPrinting
 )
 
 # Basic inline for printings within Card admin
@@ -31,3 +31,4 @@ admin.site.register(FunctionalKeyword)
 admin.site.register(Set)
 admin.site.register(Rarity)
 admin.site.register(UserCardPrintings)
+admin.site.register(SetPrinting)

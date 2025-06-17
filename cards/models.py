@@ -30,12 +30,30 @@ class FunctionalKeyword(models.Model):
         return self.name
 
 class Set(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    code = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    release_date = models.DateField(null=True, blank=True)
-
+    set_id = models.CharField(max_length=20,null=True,blank=True )  # Renamed to set_id
+    unique_id = models.CharField(max_length=255,unique=True, null=True,blank=True)
+    name = models.CharField(max_length=255)
+    
     def __str__(self):
         return self.name
+    
+class SetPrinting(models.Model):
+    set = models.ForeignKey(Set, related_name='printings', on_delete=models.CASCADE)
+    unique_id = models.CharField(max_length=255)
+    edition = models.CharField(max_length=2)
+    start_card_id = models.CharField(max_length=50)
+    end_card_id = models.CharField(max_length=50)
+    initial_release_date = models.DateField(null=True,blank=True)
+    out_of_print = models.BooleanField(default=False)
+    card_database = models.URLField(null=True, blank=True)
+    product_page = models.URLField(null=True, blank=True)
+    collectors_center = models.URLField(null=True, blank=True)
+    card_gallery = models.URLField(null=True, blank=True)
+    set_logo = models.URLField(null=True, blank=True)
+    release_notes = models.URLField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.set.name} ({self.edition})"
 
 class Rarity(models.Model):
     name = models.CharField(max_length=50)
