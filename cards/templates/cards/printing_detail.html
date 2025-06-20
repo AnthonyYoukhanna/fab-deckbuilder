@@ -23,9 +23,9 @@
         <h3>Printing Details</h3>
         <ul>
             <li><strong>Set:</strong> {{ printing.set.id }}</li>
-            <li><strong>Rarity:</strong> {{ printing.rarity.name }}</li>
-            <li><strong>Foiling:</strong> {{ printing.foiling }}</li>
-            <li><strong>Edition:</strong> {{ printing.edition}}</li>
+            <li><strong>Rarity:</strong> {{ printing.rarity.description }}</li>
+            <li><strong>Foiling:</strong> {{ printing.get_foiling_display }}</li>
+            <li><strong>Edition:</strong> {{ printing.get_edition_display}}</li>
         </ul>
     </div>
 

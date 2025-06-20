@@ -1,102 +1,95 @@
-<!DOCTYPE html>
-<html>
 {% extends "base.html" %}
 
 {% block title %}Card List{% endblock %}
 {% load custom_filters %}
+
 {% block content %}
-    <head>
-        <title>Card List</title>
-    </head>
-    <body>
-        <h1>Cards</h1>
-        <form method="get">
-            <label for="set">Set:</label>
-            <select name="set" id="set">
-                <option value="">All</option>
-                {% for s in sets %}
-                    <option value="{{ s.id }}" {% if request.GET.set == s.id|stringformat:"s" %}selected{% endif %}>
-                        {{ s.name }}
-                    </option>
-                {% endfor %}
-            </select>
+    <h1>Cards</h1>
+    <form method="get">
+        <label>Set:</label><br>
+        {% for s in sets %}
+            <input type="checkbox" name="set" value="{{ s.id }}" {% if s.id|stringformat:"s" in request.GET.set %}checked{% endif %}>
+            <label>{{ s.name }}</label><br>
+        {% endfor %}
 
-            <label for="rarity">Rarity:</label>
-            <select name="rarity" id="rarity">
-                <option value="">All</option>
-                {% for r in rarities %}
-                    <option value="{{ r.id }}" {% if request.GET.rarity == r.id|stringformat:"s" %}selected{% endif %}>
-                    {{ r.name }}
-                    </option>
-                {% endfor %}
-            </select>
+        <label>Rarity:</label><br>
+        {% for r in rarities %}
+            <input type="checkbox" name="rarity" value="{{ r.id }}" {% if r.id|stringformat:"s" in request.GET.rarity %}checked{% endif %}>
+            <label>{{ r.description }}</label><br>
+        {% endfor %}
 
-            <label for="sort">Sort By:</label>
-            <select name="sort" id="sort">
-                <option value="name">Name</option>
-                <option value="pitch">Pitch</option>
-                <option value="cost">Cost</option>
-            </select>
+        <label>Keywords:</label><br>
+        {% for k in keywords %}
+            <input type="checkbox" name="keywords" value="{{ k.id }}" {% if k.id|stringformat:"s" in request.GET.keywords %}checked{% endif %}>
+            <label>{{ k.name }}</label><br>
+        {% endfor %}
 
-            <button type="submit">Apply</button>
-        </form>
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: flex-start;">
-            {% for card in page_obj %}
-                <div class="card-wrapper" data-card-unique-id="{{ card.unique_id }}" style="text-align: center; width: 200px;">
-                <!-- clickable image -->
+        <label>Foils:</label><br>
+        {% for foil in foils %}
+            <input type="checkbox" name="foils" value="{{ foil.0 }}" {% if foil.0 in request.GET.foils %}checked{% endif %}>
+            <label>{{ foil.1 }}</label><br>
+        {% endfor %}
+
+        <label>Editions:</label><br>
+        {% for edition in editions %}
+            <input type="checkbox" name="editions" value="{{ edition.0 }}" {% if edition.0 in request.GET.editions %}checked{% endif %}>
+            <label>{{ edition.1 }}</label><br>
+        {% endfor %}
+
+        <label for="sort">Sort By:</label>
+        <select name="sort" id="sort">
+            <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>Name</option>
+            <option value="pitch" {% if request.GET.sort == "pitch" %}selected{% endif %}>Pitch</option>
+            <option value="cost" {% if request.GET.sort == "cost" %}selected{% endif %}>Cost</option>
+        </select>
+
+        <button type="submit">Apply</button>
+    </form>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: flex-start;">
+        {% for card in page_obj %}
+            <div class="card-wrapper" data-card-unique-id="{{ card.unique_id }}" style="text-align: center; width: 200px;">
                 <div class="card-clickable" style="cursor: pointer;">
                     <img src="{{ card.image_url }}" alt="{{ card.card.name }}" height="300"><br>
                     <strong>{{ card.card.name }}</strong>
                 </div>
-
-                <!-- details button -->
                 <div>
                     <a href="{% url 'card_printing_detail' card.unique_id %}">
                     <button type="button">View Details</button>
                     </a>
                 </div>
-
-                <!-- quantity owned -->
                 <div>
                     Owned: <span class="quantity" id="quantity-{{ card.unique_id }}">
                     {{ quantities|get_item:card.unique_id|default:"0" }}
                     </span>
                 </div>
-                </div>
-            {% endfor %}
-        </div>
+            </div>
+        {% endfor %}
+    </div>
 
+    <div class="pagination">
+        <span>
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
 
-        <div class="pagination">
-            <span>
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
+        {% if page_obj.has_previous %}
+            <a href="?{{ query_string }}&page=1">First</a>
+            <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
 
-            {% if page_obj.has_previous %}
-                <a href="?{{ query_string }}&page=1">First</a>
-                <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <strong>{{ num }}</strong>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
             {% endif %}
+        {% endfor %}
 
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <strong>{{ num }}</strong>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <a href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">Next</a>
-                <a href="?{{ query_string }}&page={{ page_obj.paginator.num_pages }}">Last</a>
-            {% endif %}
-        </div>
-
-    </body>
+        {% if page_obj.has_next %}
+            <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">Next</a>
+            <a href="?{{ query_string }}&page={{ page_obj.paginator.num_pages }}">Last</a>
+        {% endif %}
+    </div>
 {% load static %}
 <script src="{% static 'cards/js/increment_card.js' %}"></script>
 {% endblock %}
-
-
-
-</html>
-

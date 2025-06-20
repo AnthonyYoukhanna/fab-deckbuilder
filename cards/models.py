@@ -57,6 +57,7 @@ class SetPrinting(models.Model):
 
 class Rarity(models.Model):
     name = models.CharField(max_length=50)
+    description =  models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -109,11 +110,19 @@ class CardPrinting(models.Model):
         ('C', 'Cold Foil'),
         ('G', 'Gold Foil')
     ]
+
+    EDITION_CHOICES = [
+        ('A', 'Alpha'),
+        ('F', 'First'),
+        ('U', 'Unlimited'),
+        ('N', 'No specified edition'), # (used for promos, non-set releases, etc.)
+    ]
+
     unique_id = models.CharField(max_length=100, unique=True)
     card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name='printings')
-    set = models.ForeignKey(Set, on_delete=models.CASCADE)
-    edition = models.CharField(max_length=10, null=True, blank=True)
-    foiling = models.CharField(max_length=10, null=True, blank=True)
+    set_printing = models.ForeignKey(SetPrinting, on_delete=models.CASCADE, null=True, blank=True)
+    edition = models.CharField(max_length=10, choices=EDITION_CHOICES, null=True, blank=True)
+    foiling = models.CharField(max_length=10,choices=FOIL_CHOICES, null=True, blank=True)
     rarity = models.ForeignKey(Rarity, on_delete=models.SET_NULL, null=True, blank=True)
     art_variation = models.CharField(max_length=100, blank=True, null=True)
     image_url = models.URLField()
@@ -126,7 +135,7 @@ class CardPrinting(models.Model):
         unique_together = ('unique_id',)
 
     def __str__(self):
-        return f"{self.card.name} ({self.set.name})"
+        return f"{self.card.name} ({self.set_printing.set.name} - {self.set_printing.edition})"
 
 
 class UserCardPrintings(models.Model):

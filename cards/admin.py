@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     CardType, CardSubType, Keyword, FunctionalKeyword,
-    Set, Rarity, Card, CardPrinting, UserCardPrintings,SetPrinting
+    Set, Rarity, Card, CardPrinting, UserCardPrintings,SetPrinting,
+    
 )
 
 # Basic inline for printings within Card admin
@@ -19,8 +20,8 @@ class CardAdmin(admin.ModelAdmin):
 
 @admin.register(CardPrinting)
 class CardPrintingAdmin(admin.ModelAdmin):
-    list_display = ('card', 'set', 'edition', 'foiling', 'rarity')
-    list_filter = ('set', 'foiling', 'rarity')
+    list_display = ('card', 'set_printing', 'edition', 'foiling', 'rarity')
+    list_filter = ('set_printing', 'foiling', 'rarity')
     search_fields = ('card__name',)
 
 # Register simple models normally

@@ -22,14 +22,13 @@ class Command(BaseCommand):
 
             for printing in set_data['printings']:
 
+                initial_release_date = None
                 if 'initial_release_date' in printing and printing['initial_release_date']:
-                    initial_release_date_str = printing['initial_release_date']
                     try:
+                        initial_release_date_str = printing['initial_release_date']
                         initial_release_date = datetime.strptime(initial_release_date_str, "%Y-%m-%dT%H:%M:%S.%fZ").date()
                     except ValueError:
-                        continue  # Handle invalid date format
-                else:
-                    continue  # Set to None if the date is missing
+                        pass  # Keep it as None if parsing fails
 
                 SetPrinting.objects.get_or_create(
                     unique_id=printing['unique_id'],  # separate unique_id handling

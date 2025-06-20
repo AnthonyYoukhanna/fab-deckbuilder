@@ -3,7 +3,7 @@ import requests
 from django.core.management.base import BaseCommand
 from cards.models import (
     Card, CardPrinting, CardType, CardSubType, Keyword,
-    FunctionalKeyword, Set, Rarity
+    FunctionalKeyword, Set, Rarity, SetPrinting
 )
 
 class Command(BaseCommand):
@@ -81,18 +81,17 @@ class Command(BaseCommand):
 
             # --- Printings ---
             for printing in entry.get("printings", []):
-                set_code = printing.get("set_printing_unique_id")
+                print(f"🔍 Processing: {printing.get('set_printing_unique_id')}")
+                set_code = printing.get("set_printing_unique_id")  # Or whatever your JSON uses
                 if not set_code:
+                    print(f"⚠️ No set_code found in printing: {printing}")
+                    continue  # skip if missing
+
+                try:
+                    set_obj = SetPrinting.objects.get(unique_id=set_code)
+                except SetPrinting.DoesNotExist:
+                    print(f"❌ Set with code '{set_code}' not found for printing {printing['id']}")
                     continue
-
-                set_obj, set_created = Set.objects.get_or_create(
-                    name=set_code,  # Assuming 'set_code' is the name or identifier of the set
-                    defaults={"name": set_code}
-                )
-
-                if set_created:
-                    print(f"  🗃️ Created Set: {set_code}")
-
 
                 rarity_name = printing.get("rarity")
                 rarity_obj = None
@@ -119,7 +118,7 @@ class Command(BaseCommand):
                         "art_variation": printing.get("art_variations", ""),
                         "flavour_text": printing.get("flavour_text", ""),
                         "card":card,
-                        "set":set_obj,
+                        "set_printing":set_obj,
                         "foiling":foiling,
                         "card_number":card_number or "",
                         "edition":edition or "",
