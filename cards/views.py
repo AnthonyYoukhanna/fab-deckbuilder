@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Min
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -12,13 +12,52 @@ from django.shortcuts import render
 from .models import CardPrinting, Rarity, Set, Keyword, CardSubType, CardType
 
 def card_list(request):
+
+    exclude_filter = (
+        Q(printings__set__name__icontains='Blitz') | 
+        Q(printings__set__name__icontains='Armory') | 
+        Q(printings__set__name__icontains='Deck') | 
+        Q(printings__set__name__icontains='Promo') | 
+        Q(printings__set__name__icontains='Classic') |
+        Q(printings__set__name__icontains='Event') | 
+        Q(printings__set__name__icontains='Table') | 
+        Q(printings__set__name__icontains='Strike') | 
+        Q(printings__set__name__icontains='Worlds')
+    )
+
     sort_by = request.GET.get('sort')
     cards = CardPrinting.objects.select_related('card', 'set_printing', 'rarity').all()
-    sets = Set.objects.all()
+    sets = Set.objects.annotate(
+        earliest_release=Min('printings__initial_release_date')
+        ).exclude(exclude_filter
+        ).order_by('earliest_release') #sorts the filtering section by release date
+    
+    excluded_sets = Set.objects.annotate(
+        earliest_release=Min('printings__initial_release_date')
+        ).filter(exclude_filter).order_by('earliest_release') #Gets the sets that were filtered out back in
+    
+
     rarities = Rarity.objects.all()
     keywords = Keyword.objects.all()  # Assuming you're filtering by keywords
     foils = CardPrinting.FOIL_CHOICES
     editions = CardPrinting.EDITION_CHOICES
+
+    #Filter out cards from blitz decks and etc from initial page population.
+    include_extra = request.GET.get('include_extra', '') == 'on'
+    if not include_extra:
+        exclude_filter = (
+            Q(set_printing__set__name__icontains='Blitz') |
+            Q(set_printing__set__name__icontains='Armory') |
+            Q(set_printing__set__name__icontains='Deck') |
+            Q(set_printing__set__name__icontains='Promo') |
+            Q(set_printing__set__name__icontains='Classic') |
+            Q(set_printing__set__name__icontains='Event') |
+            Q(set_printing__set__name__icontains='Table') |
+            Q(set_printing__set__name__icontains='Strike') |
+            Q(set_printing__set__name__icontains='Worlds')        
+        )
+        cards = cards.exclude(exclude_filter)
+
 
     # Get user quantities if logged in
     user_quantities = {}
@@ -69,6 +108,7 @@ def card_list(request):
     context = {
         'page_obj': page_obj,
         'sets': sets,
+        'excluded_sets': excluded_sets,
         'rarities': rarities,
         'keywords': keywords,
         'foils': foils,

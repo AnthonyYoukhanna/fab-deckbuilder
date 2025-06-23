@@ -10,6 +10,10 @@ class CardPrintingInline(admin.TabularInline):
     model = CardPrinting
     extra = 0
 
+class SetPrintingInline(admin.TabularInline):
+    model = SetPrinting
+    extra = 0
+
 @admin.register(Card)
 class CardAdmin(admin.ModelAdmin):
     list_display = ('name', 'cost', 'pitch', 'power', 'defense', 'blitz_legal')
@@ -24,12 +28,17 @@ class CardPrintingAdmin(admin.ModelAdmin):
     list_filter = ('set_printing', 'foiling', 'rarity')
     search_fields = ('card__name',)
 
+@admin.register(Set)
+class SetAdmin(admin.ModelAdmin):
+    list_display = ('name', 'set_id', 'unique_id')
+    inlines = [SetPrintingInline]
+
 # Register simple models normally
 admin.site.register(CardType)
 admin.site.register(CardSubType)
 admin.site.register(Keyword)
 admin.site.register(FunctionalKeyword)
-admin.site.register(Set)
+#admin.site.register(Set)
 admin.site.register(Rarity)
 admin.site.register(UserCardPrintings)
 admin.site.register(SetPrinting)

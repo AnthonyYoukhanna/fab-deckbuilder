@@ -5,90 +5,123 @@
 
 {% block content %}
     <h1>Cards</h1>
-    <form method="get">
-        <label>Set:</label><br>
-        {% for s in sets %}
-            <input type="checkbox" name="set" value="{{ s.id }}" {% if s.id|stringformat:"s" in request.GET.set %}checked{% endif %}>
-            <label>{{ s.name }}</label><br>
-        {% endfor %}
+    <div style="display: flex; align-items: flex-start; gap: 2rem;">
+        <div class="filters" style="min-width: 250px; padding: 1rem; border: 1px solid #ccc; border-radius: 8px;">
+            <h3>Filters</h3>
+            <form method="get">
 
-        <label>Rarity:</label><br>
-        {% for r in rarities %}
-            <input type="checkbox" name="rarity" value="{{ r.id }}" {% if r.id|stringformat:"s" in request.GET.rarity %}checked{% endif %}>
-            <label>{{ r.description }}</label><br>
-        {% endfor %}
+                <details open>
+                    <summary><strong>Sets</summary></strong>
+                    {% for s in sets %}
+                        <input type="checkbox" name="set" value="{{ s.id }}" {% if s.id|stringformat:"s" in request.GET.set %}checked{% endif %}>
+                        <label>{{ s.name }}</label><br>
+                    {% endfor %}
+                </details>
 
-        <label>Keywords:</label><br>
-        {% for k in keywords %}
-            <input type="checkbox" name="keywords" value="{{ k.id }}" {% if k.id|stringformat:"s" in request.GET.keywords %}checked{% endif %}>
-            <label>{{ k.name }}</label><br>
-        {% endfor %}
+                <details>
+                    <summary><strong>Optional / Supplemental Sets</summary></strong>
+                    {% for s in excluded_sets %}
+                        <input type="checkbox" name="set" value="{{ s.id }}" {% if s.id|stringformat:"s" in request.GET.set %}checked{% endif %}>
+                        <label>{{ s.name }}</label><br>
+                    {% endfor %}
+                </details>
 
-        <label>Foils:</label><br>
-        {% for foil in foils %}
-            <input type="checkbox" name="foils" value="{{ foil.0 }}" {% if foil.0 in request.GET.foils %}checked{% endif %}>
-            <label>{{ foil.1 }}</label><br>
-        {% endfor %}
-
-        <label>Editions:</label><br>
-        {% for edition in editions %}
-            <input type="checkbox" name="editions" value="{{ edition.0 }}" {% if edition.0 in request.GET.editions %}checked{% endif %}>
-            <label>{{ edition.1 }}</label><br>
-        {% endfor %}
-
-        <label for="sort">Sort By:</label>
-        <select name="sort" id="sort">
-            <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>Name</option>
-            <option value="pitch" {% if request.GET.sort == "pitch" %}selected{% endif %}>Pitch</option>
-            <option value="cost" {% if request.GET.sort == "cost" %}selected{% endif %}>Cost</option>
-        </select>
-
-        <button type="submit">Apply</button>
-    </form>
-
-    <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: flex-start;">
-        {% for card in page_obj %}
-            <div class="card-wrapper" data-card-unique-id="{{ card.unique_id }}" style="text-align: center; width: 200px;">
-                <div class="card-clickable" style="cursor: pointer;">
-                    <img src="{{ card.image_url }}" alt="{{ card.card.name }}" height="300"><br>
-                    <strong>{{ card.card.name }}</strong>
-                </div>
+                <details open>
+                    <summary><strong>Rarity</summary></strong>
+                    {% for r in rarities %}
+                        <input type="checkbox" name="rarity" value="{{ r.id }}" {% if r.id|stringformat:"s" in request.GET.rarity %}checked{% endif %}>
+                        <label>{{ r.description }}</label><br>
+                    {% endfor %}
+                </details>
+                <!--
                 <div>
-                    <a href="{% url 'card_printing_detail' card.unique_id %}">
-                    <button type="button">View Details</button>
-                    </a>
+                    <h4>Keywords</h4>
+                    {% for k in keywords %}
+                        <input type="checkbox" name="keywords" value="{{ k.id }}" {% if k.id|stringformat:"s" in request.GET.keywords %}checked{% endif %}>
+                        <label>{{ k.name }}</label><br>
+                    {% endfor %}
                 </div>
+                -->
+                <details open>
+                    <summary><strong>Foils:</summary></strong>
+                    {% for foil in foils %}
+                        <input type="checkbox" name="foils" value="{{ foil.0 }}" {% if foil.0 in request.GET.foils %}checked{% endif %}>
+                        <label>{{ foil.1 }}</label><br>
+                    {% endfor %}
+                </details>
+
+                <details open>
+                    <summary><strong>Editions:</summary></strong>
+                    {% for edition in editions %}
+                        <input type="checkbox" name="editions" value="{{ edition.0 }}" {% if edition.0 in request.GET.editions %}checked{% endif %}>
+                        <label>{{ edition.1 }}</label><br>
+                    {% endfor %}
+                </details>
+
                 <div>
-                    Owned: <span class="quantity" id="quantity-{{ card.unique_id }}">
-                    {{ quantities|get_item:card.unique_id|default:"0" }}
-                    </span>
+                    <label for="sort">Sort By:</label>
+                    <select name="sort" id="sort">
+                        <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>Name</option>
+                        <option value="pitch" {% if request.GET.sort == "pitch" %}selected{% endif %}>Pitch</option>
+                        <option value="cost" {% if request.GET.sort == "cost" %}selected{% endif %}>Cost</option>
+                    </select>
+                    <button type="submit">Apply</button>
                 </div>
+
+                <div>
+                    <input type="checkbox" name="include_extra" id="include_extra" {% if request.GET.include_extra == 'on' %}checked{% endif %}>
+                    <label for="include_extra">Include promos, decks, Blitz, etc.</label>
+                </div>
+
+            </form>
+        </div>
+
+        <div style="flex-grow: 1;">
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: flex-start;">
+                {% for card in page_obj %}
+                    <div class="card-wrapper" data-card-unique-id="{{ card.unique_id }}" style="text-align: center; width: 200px;">
+                        <div class="card-clickable" style="cursor: pointer;">
+                            <img src="{{ card.image_url }}" alt="{{ card.card.name }}" height="300"><br>
+                            <strong>{{ card.card.name }}</strong>
+                        </div>
+                        <div>
+                            <a href="{% url 'card_printing_detail' card.unique_id %}">
+                            <button type="button">View Details</button>
+                            </a>
+                        </div>
+                        <div>
+                            Owned: <span class="quantity" id="quantity-{{ card.unique_id }}">
+                            {{ quantities|get_item:card.unique_id|default:"0" }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-    </div>
 
-    <div class="pagination">
-        <span>
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </span>
+            <div class="pagination">
+                <span>
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
 
-        {% if page_obj.has_previous %}
-            <a href="?{{ query_string }}&page=1">First</a>
-            <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">Previous</a>
-        {% endif %}
+                {% if page_obj.has_previous %}
+                    <a href="?{{ query_string }}&page=1">First</a>
+                    <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
 
-        {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-                <strong>{{ num }}</strong>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <a href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
-            {% endif %}
-        {% endfor %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <strong>{{ num }}</strong>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?{{ query_string }}&page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
 
-        {% if page_obj.has_next %}
-            <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">Next</a>
-            <a href="?{{ query_string }}&page={{ page_obj.paginator.num_pages }}">Last</a>
-        {% endif %}
+                {% if page_obj.has_next %}
+                    <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?{{ query_string }}&page={{ page_obj.paginator.num_pages }}">Last</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 {% load static %}
 <script src="{% static 'cards/js/increment_card.js' %}"></script>
