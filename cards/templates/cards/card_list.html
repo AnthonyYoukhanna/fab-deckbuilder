@@ -15,6 +15,8 @@
                     {% for s in sets %}
                         <input type="checkbox" name="set" value="{{ s.id }}" {% if s.id|stringformat:"s" in request.GET.set %}checked{% endif %}>
                         <label>{{ s.name }}</label><br>
+                        <button type="button" class="bulk-add-btn" data-set-id="{{ s.id }}" data-set-name="{{ s.name }}">
+                            Add Bulk</button>
                     {% endfor %}
                 </details>
 
@@ -23,6 +25,8 @@
                     {% for s in excluded_sets %}
                         <input type="checkbox" name="set" value="{{ s.id }}" {% if s.id|stringformat:"s" in request.GET.set %}checked{% endif %}>
                         <label>{{ s.name }}</label><br>
+                        <button type="button" class="bulk-add-btn" data-set-id="{{ s.id }}" data-set-name="{{ s.name }}">
+                            Add Bulk</button>
                     {% endfor %}
                 </details>
 
@@ -125,4 +129,5 @@
     </div>
 {% load static %}
 <script src="{% static 'cards/js/increment_card.js' %}"></script>
+<script src="{% static 'cards/js/bulk_add.js' %}"></script>
 {% endblock %}

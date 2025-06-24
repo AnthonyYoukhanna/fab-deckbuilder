@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Your Collection</h1>
+<div style="display: flex">
+
+    <aside style="width: 250px; padding: 1rem; border-right: 1px solid #ccc;">
+        <form method="get">
+        <div>
+            <label for="set">Sets:</label><br>
+            <select name="set" id="set" multiple size="5" style="width: 200px;">
+            {% for s in main_sets %}
+                <option value="{{ s.id }}" {% if s.id|stringformat:"s" in sets %}selected{% endif %}>
+                {{ s.name }}
+                </option>
+            {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label for="set">Extra Sets:</label><br>
+            <select name="set" id="set" multiple size="5" style="width: 200px;">
+            {% for s in extra_sets %}
+                <option value="{{ s.id }}" {% if s.id|stringformat:"s" in sets %}selected{% endif %}>
+                {{ s.name }}
+                </option>
+            {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="rarity">Rarities:</label><br>
+            <select name="rarity" id="rarity" multiple size="5" style="width: 200px;">
+            {% for r in rarities %}
+                <option value="{{ r.id }}" {% if r.id|stringformat:"s" in rarities %}selected{% endif %}>
+                {{ r.description }}
+                </option>
+            {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="type">Types:</label><br>
+            <select name="type" id="type" multiple size="5" style="width: 200px;">
+            {% for t in types %}
+                <option value="{{ t.id }}" {% if t.id|stringformat:"s" in types %}selected{% endif %}>
+                {{ t.name }}
+                </option>
+            {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" style="margin-top: 10px;">Apply Filters</button>
+        </form>
+    </aside>
+
+    <main style="flex: 1; padding: 1rem;">
+        <form method="get">
+            <input
+                type="text"
+                name="search"
+                placeholder="Search cards, keywords, types..."
+                value="{{ request.GET.search }}"
+                style="width: 100%; padding: 0.5rem 1rem; font-size: 1.1rem;"
+            >
+            <button type="submit">Search</button>
+        </form>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            {% for user_card in page_obj %}
+                <div style="text-align: center; width: 200px;">
+                    <img src="{{ user_card.card_printing.image_url }}" alt="{{ user_card.card_printing.card.name }}" height="300">
+                    <p><strong>{{ user_card.card_printing.card.name }}</strong></p>
+                    <p>Quantity: {{ user_card.quantity }}</p>
+                </div>
+            {% empty %}
+                <p>You don't own any cards yet.</p>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+        {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+
