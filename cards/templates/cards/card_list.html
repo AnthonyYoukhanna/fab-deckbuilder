@@ -97,6 +97,7 @@
                             Owned: <span class="quantity" id="quantity-{{ card.unique_id }}">
                             {{ quantities|get_item:card.unique_id|default:"0" }}
                             </span>
+                            <button class="remove-btn" data-card-id="{{ card.unique_id }}">Remove</button>
                         </div>
                     </div>
                 {% endfor %}
@@ -130,4 +131,5 @@
 {% load static %}
 <script src="{% static 'cards/js/increment_card.js' %}"></script>
 <script src="{% static 'cards/js/bulk_add.js' %}"></script>
+<script src="{% static 'cards/js/remove_card.js' %}"></script>
 {% endblock %}

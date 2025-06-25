@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import card_list, increment_card, collection_view
+from .views import card_list, increment_card, collection_view, remove_card
 from . import views
 
 urlpatterns = [
@@ -13,4 +13,5 @@ urlpatterns += [
     path('increment-card/', views.increment_card, name='increment_card'),
     path('bulk-add/', views.bulk_add_view, name='bulk-add'),
     path('collection/', views.collection_view, name='collection'),
+    path('remove/', views.remove_card, name='remove_card'),
     ]

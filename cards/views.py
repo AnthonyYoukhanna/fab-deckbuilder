@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q, Min
 from django.core.paginator import Paginator
+import json
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import QueryDict, JsonResponse
@@ -240,3 +241,20 @@ def collection_view(request):
     }
     return render(request, 'cards/collection.html', context)
 
+@require_POST
+@login_required
+def remove_card(request):
+    try:
+        data = json.loads(request.body)
+        card_id = data.get("card_id")
+        if card_id:
+            user_card = UserCardPrintings.objects.get(user=request.user, card_printing__unique_id=card_id)
+            if user_card.quantity > 1:
+                user_card.quantity -= 1
+                user_card.save()
+            else:
+                user_card.delete()
+            return JsonResponse({"success": True})
+    except (UserCardPrintings.DoesNotExist, json.JSONDecodeError):
+        pass
+    return JsonResponse({"success": False})

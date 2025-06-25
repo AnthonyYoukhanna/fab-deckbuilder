@@ -70,7 +70,8 @@
                 <div style="text-align: center; width: 200px;">
                     <img src="{{ user_card.card_printing.image_url }}" alt="{{ user_card.card_printing.card.name }}" height="300">
                     <p><strong>{{ user_card.card_printing.card.name }}</strong></p>
-                    <p>Quantity: {{ user_card.quantity }}</p>
+                    <p>Quantity: <span class="quantity">{{ user_card.quantity }}</span></p>
+                    <button class="remove-btn" data-card-id="{{ user_card.card_printing.unique_id }}">Remove</button>
                 </div>
             {% empty %}
                 <p>You don't own any cards yet.</p>
@@ -92,6 +93,10 @@
         </div>
     </main>
 </div>
+
+{% load static %}
+<script src="{% static 'cards/js/remove_card.js' %}"></script>
+
 {% endblock %}
 
 
